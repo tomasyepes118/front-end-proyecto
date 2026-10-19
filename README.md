@@ -2,13 +2,6 @@
 
 **Estudiante:** Tomas Yepes Arboleda  
 **Institución:** Institución Universitaria Pascual Bravo  
-**Modalidad de esta versión:** individual.
-
-## Objetivo
-
-Practicar Git y GitHub con un proyecto de frontend React creado con Vite.
-La aplicación muestra el encabezado `Mi Proyecto Front React`. En la rama
-`feature/tomas_yepes`, se agrega el nombre del estudiante dentro de un párrafo.
 
 ## Ejecutar
 
@@ -65,10 +58,3 @@ grupos de tres; el profesor debe aceptar la modalidad individual.
 - **Fetch:** descarga referencias remotas sin integrar los cambios en la rama actual.
 - **Status:** muestra cambios preparados, modificados y archivos sin seguimiento.
 - **Diff:** muestra las diferencias entre versiones.
-
-## Entrega
-
-El punto 10 solicita subir a Classroom un archivo `.txt` con los integrantes
-y el enlace del repositorio público de GitHub. En esta versión se declara un
-solo integrante. Antes de entregar, el repositorio debe estar publicado,
-los tres pull requests deben estar fusionados y `main` debe mostrar el nombre.
