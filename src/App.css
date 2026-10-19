@@ -1,0 +1,37 @@
+.project {
+  width: min(100%, 680px);
+  padding: clamp(28px, 7vw, 60px);
+  background: #fff;
+  border: 1px solid #e1e7ef;
+  border-radius: 20px;
+  box-shadow: 0 18px 60px #1c35500d;
+}
+.project__label {
+  color: #295ea3;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+h1 {
+  margin: 24px 0 16px;
+  font-size: clamp(2rem, 6vw, 3rem);
+  line-height: 1.12;
+  letter-spacing: -0.035em;
+}
+.project p {
+  margin: 0;
+  color: #526176;
+  font-size: 1.15rem;
+  line-height: 1.6;
+}
+.project__divider {
+  height: 3px;
+  width: 48px;
+  margin: 32px 0 24px;
+  background: #f1ce1e;
+}
+footer {
+  color: #637184;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
