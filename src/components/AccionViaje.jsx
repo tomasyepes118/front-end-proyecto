@@ -11,7 +11,7 @@ export default function AccionViaje({ accion, viaje, control, procesar, cerrar }
   const [error, setError] = useState('')
   const [titulo, boton] = textos[accion]
 
-  function enviar(evento) {
+  async function enviar(evento) {
     evento.preventDefault()
     const campos = new FormData(evento.currentTarget)
     if (accion === 'control') {
@@ -20,10 +20,10 @@ export default function AccionViaje({ accion, viaje, control, procesar, cerrar }
         setError('Escribe un número de ticket o una referencia de evidencia.')
         return
       }
-      const mensaje = procesar({ id: viaje.id, aprobado: campos.get('resultado') === 'aprobado', soporte })
+      const mensaje = await procesar({ aprobado: campos.get('resultado') === 'aprobado', soporte })
       if (mensaje) setError(mensaje)
     } else {
-      const mensaje = procesar()
+      const mensaje = await procesar()
       if (mensaje) setError(mensaje)
     }
   }

@@ -5,11 +5,11 @@ import { Dialogo, Opciones } from './Interfaz.jsx'
 export default function FormularioVehiculo({ vehiculos, actual, registrar, cerrar }) {
   const [error, setError] = useState('')
 
-  function enviar(evento) {
+  async function enviar(evento) {
     evento.preventDefault()
     const datos = new FormData(evento.currentTarget)
     const vehiculo = {
-      id: actual?.id ?? Math.max(1000, ...vehiculos.map(bus => bus.id)) + 1,
+      version: actual?.version,
       plate: datos.get('placa').trim().toUpperCase(),
       code: datos.get('codigo').trim().toUpperCase(),
       type: datos.get('tipo'),
@@ -23,12 +23,12 @@ export default function FormularioVehiculo({ vehiculos, actual, registrar, cerra
 
     if (!vehiculo.code || !vehiculo.brand) {
       setError('Escribe el código interno y la marca.')
-    } else if (vehiculos.some(bus => bus.id !== vehiculo.id && (bus.plate === vehiculo.plate || bus.code.toUpperCase() === vehiculo.code))) {
+    } else if (vehiculos.some(bus => bus.id !== actual?.id && (bus.plate === vehiculo.plate || bus.code.toUpperCase() === vehiculo.code))) {
       setError('La placa o el código interno ya están registrados.')
     } else if (vehiculo.maintenance < vehiculo.km) {
       setError('El próximo mantenimiento debe ser igual o mayor al kilometraje actual.')
     } else {
-      registrar(vehiculo)
+      setError(await registrar(vehiculo))
     }
   }
 

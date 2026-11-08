@@ -28,7 +28,6 @@ export default function Registros({ tipo, registros, vehiculos, guardar }) {
     if (leyendo) return
     const datos = new FormData(evento.currentTarget)
     const registro = {
-      id: Math.max(0, ...registros.map(item => item.id)) + 1,
       fecha: datos.get('fecha'),
       vehiculo: Number(datos.get('vehiculo')),
     }
@@ -56,8 +55,9 @@ export default function Registros({ tipo, registros, vehiculos, guardar }) {
       }
     }
 
-    guardar(registro)
-    setAbierto(false)
+    const fallo = await guardar(registro)
+    if (fallo) setError(fallo)
+    else setAbierto(false)
   }
 
   return (
@@ -78,7 +78,7 @@ export default function Registros({ tipo, registros, vehiculos, guardar }) {
               ) : (
                 <>
                   <td className="detalle-registro">{item.descripcion}</td>
-                  <td><a href={item.evidencia} download={item.archivo}>Descargar evidencia</a></td>
+                  <td><a href={`/api/incidentes/${item.id}/evidencia`} download={item.archivo}>Descargar evidencia</a></td>
                 </>
               )}
             </tr>

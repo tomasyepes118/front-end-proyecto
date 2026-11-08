@@ -3,9 +3,9 @@ import Panel from './components/Panel.jsx'
 import FormularioVehiculo from './components/FormularioVehiculo.jsx'
 import FormularioViaje from './components/FormularioViaje.jsx'
 import AccionViaje from './components/AccionViaje.jsx'
-import { cuentasDemo, paginas, puedeVerPagina } from './data/demo.js'
-import { guardarOperacion, guardarSesion, leerOperacion, leerSesion } from './lib/almacenamiento.js'
-import { cambiarRegistro, obtenerDetalleViajes, validarDespacho } from './lib/operacion.js'
+import { paginas, puedeVerPagina } from './data/demo.js'
+import { consultarApi } from './lib/api.js'
+import { obtenerDetalleViajes } from './lib/operacion.js'
 import Acceso from './pages/Acceso.jsx'
 import Resumen from './pages/Resumen.jsx'
 import Vehiculos from './pages/Vehiculos.jsx'
@@ -31,12 +31,12 @@ function leerPagina() {
 }
 
 export default function App() {
-  const [usuario, setUsuario] = useState(leerSesion)
+  const [cuenta, setCuenta] = useState(null)
+  const [cargando, setCargando] = useState(true)
   const [ruta, setRuta] = useState(leerPagina)
-  const [datos, setDatos] = useState(leerOperacion)
+  const [datos, setDatos] = useState(null)
   const [formulario, setFormulario] = useState(null)
   const [mensaje, setMensaje] = useState('')
-  const cuenta = cuentasDemo[usuario]
   const esAdmin = cuenta?.rol === 'Administrador'
   const puedeOperar = Boolean(cuenta && cuenta.rol !== 'Consulta')
 
@@ -50,53 +50,82 @@ export default function App() {
     return () => window.removeEventListener('hashchange', cambiarPagina)
   }, [])
 
-  function cambiarSesion(nuevoUsuario) {
-    guardarSesion(nuevoUsuario)
-    setUsuario(nuevoUsuario)
-    setFormulario(null)
+  useEffect(() => {
+    let activo = true
+
+    async function recuperarSesion() {
+      try {
+        const sesion = await consultarApi('/sesion')
+        const operacion = await consultarApi('/operacion')
+        if (activo) {
+          setDatos(operacion)
+          setCuenta(sesion.cuenta)
+        }
+      } catch (error) {
+        if (activo && error.status !== 401) setMensaje('No se pudo conectar con el servidor de FloatMate.')
+      } finally {
+        if (activo) setCargando(false)
+      }
+    }
+
+    void recuperarSesion()
+    return () => { activo = false }
+  }, [])
+
+  async function iniciarSesion(usuario, clave) {
+    const sesion = await consultarApi('/sesion', { metodo: 'POST', datos: { usuario, clave } })
+    const operacion = await consultarApi('/operacion')
+    setDatos(operacion)
+    setCuenta(sesion.cuenta)
     setMensaje('')
   }
 
-  function registrar(modulo, registro, accion, referencia, exito = mensajes[modulo]) {
-    const editaCatalogo = ['vehiculos', 'conductores', 'rutas'].includes(modulo)
-    if (!puedeOperar || (editaCatalogo && !esAdmin)) return
-    const registroAuditoria = {
-      id: Math.max(0, ...datos.auditoria.map(item => item.id)) + 1,
-      fecha: new Date().toISOString(),
-      usuario,
-      accion,
-      referencia,
+  async function cerrarSesion() {
+    try {
+      await consultarApi('/sesion', { metodo: 'DELETE' })
+      setCuenta(null)
+      setDatos(null)
+      setFormulario(null)
+      setMensaje('')
+    } catch {
+      setMensaje('No se pudo cerrar la sesión. Inténtalo de nuevo.')
     }
-    const siguiente = {
-      ...datos,
-      [modulo]: cambiarRegistro(datos[modulo], registro),
-      auditoria: [registroAuditoria, ...datos.auditoria],
+  }
+
+  async function guardar(rutaApi, metodo, registro, exito) {
+    try {
+      const siguiente = await consultarApi(rutaApi, { metodo, datos: registro })
+      setDatos(siguiente)
+      setFormulario(null)
+      setMensaje(exito)
+      return ''
+    } catch (error) {
+      if (error.status === 401) {
+        setCuenta(null)
+        setDatos(null)
+        setFormulario(null)
+        setMensaje(error.message)
+      }
+      return error.message
     }
-    setDatos(siguiente)
-    setFormulario(null)
-    setMensaje(guardarOperacion(siguiente) ? exito : 'El cambio se aplicó en esta visita. El navegador no permitió guardarlo.')
+  }
+
+  function registrar(modulo, registro, id, exito = mensajes[modulo]) {
+    return guardar(id ? `/${modulo}/${id}` : `/${modulo}`, id ? 'PUT' : 'POST', registro, exito)
   }
 
   function procesarViaje(control) {
-    if (!puedeOperar) return 'Tu rol no puede gestionar viajes.'
-    const viaje = datos.viajes.find(viaje => viaje.id === formulario.actual.id)
-    if (!viaje) return 'El viaje no está disponible.'
-    const referencia = `Viaje ${viaje.id}`
-
-    if (formulario.tipo === 'control') {
-      if (viaje.status !== 'PROGRAMADO') return 'El viaje ya cambió de estado.'
-      registrar('controles', { ...control, usuario, fecha: new Date().toISOString() }, 'Registró control de salida', referencia)
-    } else if (formulario.tipo === 'iniciar') {
-      const error = validarDespacho(viaje, datos)
-      if (error) return error
-      registrar('viajes', { ...viaje, status: 'EN_CURSO', inicio: new Date().toISOString(), operador: usuario }, 'Inició viaje', referencia, 'Viaje iniciado correctamente.')
-    } else {
-      if (viaje.status !== 'EN_CURSO') return 'El viaje debe estar en curso para poder cerrarlo.'
-      registrar('viajes', { ...viaje, status: 'FINALIZADO', cierre: new Date().toISOString() }, 'Cerró viaje', referencia, 'Viaje finalizado correctamente.')
-    }
+    const { tipo, actual } = formulario
+    const exito = {
+      control: 'Control de salida guardado.',
+      iniciar: 'Viaje iniciado correctamente.',
+      cerrar: 'Viaje finalizado correctamente.',
+    }[tipo]
+    return guardar(`/viajes/${actual.id}/${tipo}`, 'POST', control, exito)
   }
 
-  if (!cuenta) return <Acceso iniciarSesion={cambiarSesion} />
+  if (cargando) return <main className="content"><p role="status">Cargando FloatMate…</p></main>
+  if (!cuenta) return <Acceso iniciarSesion={iniciarSesion} aviso={mensaje} />
 
   const pagina = puedeVerPagina(cuenta.rol, ruta) ? ruta : 'panel'
   const { vehiculos, viajes, conductores, rutas, controles, acpm, incidentes, auditoria } = datos
@@ -107,7 +136,7 @@ export default function App() {
   const cerrarFormulario = () => setFormulario(null)
 
   return (
-    <Panel pagina={pagina} cuenta={cuenta} cerrarSesion={() => cambiarSesion('')} mensaje={mensaje}>
+    <Panel pagina={pagina} cuenta={cuenta} cerrarSesion={cerrarSesion} mensaje={mensaje}>
       {pagina === 'panel' && <Resumen vehiculos={flota} viajes={detalleViajes} abrirViaje={puedeOperar ? abrirViaje : null} />}
       {pagina === 'vehiculos' && (
         <Vehiculos vehiculos={flota}
@@ -116,7 +145,7 @@ export default function App() {
       )}
       {['conductores', 'rutas'].includes(pagina) && (
         <Catalogo key={pagina} tipo={pagina} lista={datos[pagina]}
-          guardar={esAdmin ? item => registrar(pagina, item, pagina === 'rutas' ? 'Guardó ruta' : 'Guardó conductor', item.code) : null} />
+          guardar={esAdmin ? (item, id) => registrar(pagina, item, id) : null} />
       )}
       {pagina === 'viajes' && (
         <Viajes viajes={detalleViajes} controles={controles} abrirViaje={abrirViaje}
@@ -124,19 +153,18 @@ export default function App() {
       )}
       {['acpm', 'incidentes'].includes(pagina) && (
         <Registros key={pagina} tipo={pagina} registros={pagina === 'acpm' ? acpm : incidentes} vehiculos={vehiculos}
-          guardar={item => registrar(pagina, item, pagina === 'acpm' ? 'Registró abastecimiento' : 'Registró incidente',
-            vehiculos.find(bus => bus.id === item.vehiculo)?.plate ?? '')} />
+          guardar={item => registrar(pagina, item)} />
       )}
       {pagina === 'reportes' && <Reportes viajes={detalleViajes} acpm={acpm} />}
       {pagina === 'auditoria' && <Auditoria movimientos={auditoria} />}
       {formulario?.tipo === 'vehiculo' && (
         <FormularioVehiculo vehiculos={vehiculos} actual={formulario.actual}
-          registrar={bus => registrar('vehiculos', bus, formulario.actual ? 'Editó vehículo' : 'Registró vehículo', bus.plate,
+          registrar={bus => registrar('vehiculos', bus, formulario.actual?.id,
             formulario.actual ? 'Vehículo actualizado correctamente.' : mensajes.vehiculos)} cerrar={cerrarFormulario} />
       )}
       {formulario?.tipo === 'viaje' && (
         <FormularioViaje vehiculos={flota} viajes={viajes} conductores={conductores} rutas={rutas}
-          registrar={viaje => registrar('viajes', viaje, 'Programó viaje', `Viaje ${viaje.id}`)} cerrar={cerrarFormulario} />
+          registrar={viaje => registrar('viajes', viaje)} cerrar={cerrarFormulario} />
       )}
       {formulario?.actual && ['control', 'iniciar', 'cerrar'].includes(formulario.tipo) && (
         <AccionViaje accion={formulario.tipo} viaje={formulario.actual}

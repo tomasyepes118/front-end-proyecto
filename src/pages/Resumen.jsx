@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { Encabezado, Estado, Tabla } from '../components/Interfaz.jsx'
 import { estadosVehiculo } from '../data/demo.js'
-import { formatearSalida } from '../lib/operacion.js'
+import { formatearSalida, instanteSalida } from '../lib/operacion.js'
 
 export default function Resumen({ vehiculos, viajes, abrirViaje }) {
   const [horaDeConsulta] = useState(Date.now)
-  const proximos = viajes.filter(viaje => viaje.status === 'PROGRAMADO' && new Date(viaje.departure).getTime() > horaDeConsulta)
+  const proximos = viajes.filter(viaje => viaje.status === 'PROGRAMADO' && instanteSalida(viaje.departure) > horaDeConsulta)
   const disponibilidad = Object.entries(estadosVehiculo).map(([estado, nombre]) => ({
     estado,
     nombre,

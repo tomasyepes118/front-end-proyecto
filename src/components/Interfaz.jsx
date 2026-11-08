@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { estadosVehiculo, estadosViaje } from '../data/demo.js'
 
 export function Encabezado({ seccion, titulo, descripcion, accion, alPulsar }) {
@@ -67,6 +67,21 @@ export function Tabla({ nombre, columnas, children }) {
 
 export function Dialogo({ titulo, seccion, cerrar, guardar, error, accion, children }) {
   const dialogo = useRef(null)
+  const guardando = useRef(false)
+  const [pendiente, setPendiente] = useState(false)
+
+  async function enviar(evento) {
+    evento.preventDefault()
+    if (guardando.current) return
+    guardando.current = true
+    setPendiente(true)
+    try {
+      await guardar(evento)
+    } finally {
+      guardando.current = false
+      setPendiente(false)
+    }
+  }
 
   useEffect(() => {
     const elemento = dialogo.current
@@ -75,20 +90,20 @@ export function Dialogo({ titulo, seccion, cerrar, guardar, error, accion, child
   }, [])
 
   return (
-    <dialog ref={dialogo} aria-labelledby="titulo-dialogo" onCancel={e => { e.preventDefault(); cerrar() }}>
-      <form onSubmit={guardar}>
+    <dialog ref={dialogo} aria-labelledby="titulo-dialogo" onCancel={e => { e.preventDefault(); if (!guardando.current) cerrar() }}>
+      <form onSubmit={enviar}>
         <div className="card-title">
           <div>
             <p className="eyebrow">{seccion}</p>
             <h2 id="titulo-dialogo">{titulo}</h2>
           </div>
-          <button type="button" aria-label="Cerrar formulario" onClick={cerrar}>×</button>
+          <button type="button" aria-label="Cerrar formulario" disabled={pendiente} onClick={cerrar}>×</button>
         </div>
         {children}
         {error && <p className="error" role="alert">{error}</p>}
         <div className="actions">
-          <button type="button" onClick={cerrar}>Cancelar</button>
-          <button className="primary" type="submit">{accion}</button>
+          <button type="button" disabled={pendiente} onClick={cerrar}>Cancelar</button>
+          <button className="primary" type="submit" disabled={pendiente}>{pendiente ? 'Guardando…' : accion}</button>
         </div>
       </form>
     </dialog>

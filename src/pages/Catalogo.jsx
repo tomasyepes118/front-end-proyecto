@@ -27,7 +27,7 @@ export default function Catalogo({ tipo, lista, guardar }) {
     setError('')
   }
 
-  function enviar(evento) {
+  async function enviar(evento) {
     evento.preventDefault()
     const datos = new FormData(evento.currentTarget)
     const codigo = datos.get('codigo').trim().toUpperCase()
@@ -37,7 +37,7 @@ export default function Catalogo({ tipo, lista, guardar }) {
     }
 
     const registro = {
-      id: actual.id ?? Math.max(1000, ...lista.map(item => item.id)) + 1,
+      version: actual.version,
       code: codigo,
     }
 
@@ -61,8 +61,9 @@ export default function Catalogo({ tipo, lista, guardar }) {
       registro.status = datos.get('estado') === 'activo' ? 'DISPONIBLE' : 'INACTIVO'
     }
 
-    guardar(registro)
-    setActual(null)
+    const fallo = await guardar(registro, actual.id)
+    if (fallo) setError(fallo)
+    else setActual(null)
   }
 
   return (

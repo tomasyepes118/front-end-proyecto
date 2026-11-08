@@ -8,11 +8,16 @@ export function obtenerDetalleViajes(viajes, vehiculos, conductores, rutas) {
 }
 
 const formatoFecha = new Intl.DateTimeFormat('es-CO', {
-  day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: false,
+  day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'America/Bogota',
 })
 
+export function instanteSalida(fecha) {
+  // Los formularios de la terminal usan hora local de Medellín.
+  return Date.parse(fecha.length === 16 ? fecha + ':00-05:00' : fecha)
+}
+
 export function formatearSalida(fecha) {
-  return formatoFecha.format(new Date(fecha))
+  return formatoFecha.format(instanteSalida(fecha))
 }
 
 export function validarViaje(viaje, vehiculos, viajes, conductores, rutas) {
@@ -23,7 +28,7 @@ export function validarViaje(viaje, vehiculos, viajes, conductores, rutas) {
     return 'Selecciona una ruta, un vehículo y un conductor disponibles.'
   }
 
-  const inicio = new Date(viaje.departure).getTime()
+  const inicio = instanteSalida(viaje.departure)
   if (!Number.isFinite(inicio) || inicio <= Date.now()) {
     return 'Selecciona una fecha y hora futuras.'
   }
@@ -36,20 +41,13 @@ export function validarViaje(viaje, vehiculos, viajes, conductores, rutas) {
     if (otro.status !== 'PROGRAMADO' && otro.status !== 'EN_CURSO') return false
     if (otro.vehicle !== viaje.vehicle && otro.driver !== viaje.driver) return false
 
-    const otroInicio = new Date(otro.departure).getTime()
+    const otroInicio = instanteSalida(otro.departure)
     const otraRuta = rutas.find(ruta => ruta.id === otro.route)
     const otroFin = otroInicio + (otraRuta?.minutes ?? 0) * 60000
     return inicio < otroFin && otroInicio < fin
   })
   if (hayCruce) return 'El vehículo o el conductor ya tienen un viaje durante ese horario.'
   return ''
-}
-
-export function cambiarRegistro(lista, registro) {
-  if (lista.some(item => item.id === registro.id)) {
-    return lista.map(item => item.id === registro.id ? registro : item)
-  }
-  return [...lista, registro]
 }
 
 export function validarDespacho(viaje, operacion) {

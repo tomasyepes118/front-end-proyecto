@@ -43,11 +43,8 @@ export const rutasIniciales = [
 ]
 
 export function crearViajesIniciales() {
-  const fecha = new Date()
-  fecha.setDate(fecha.getDate() + 1)
-  const mes = String(fecha.getMonth() + 1).padStart(2, '0')
-  const dia = String(fecha.getDate()).padStart(2, '0')
-  const manana = `${fecha.getFullYear()}-${mes}-${dia}`
+  const fecha = new Date(Date.now() + 86_400_000)
+  const manana = new Intl.DateTimeFormat('sv-SE', { timeZone: 'America/Bogota' }).format(fecha)
 
   return [
     { id: 9001, vehicle: 1001, driver: 1001, route: 1001, departure: manana + 'T07:30', passengers: 13, status: 'PROGRAMADO' },

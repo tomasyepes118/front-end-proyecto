@@ -8,23 +8,21 @@ export default function FormularioViaje({ vehiculos, viajes, conductores, rutas,
   const ruta = rutas.find(ruta => ruta.id === Number(rutaElegida))
   const disponibles = vehiculos.filter(bus => bus.status === 'DISPONIBLE')
 
-  function enviar(evento) {
+  async function enviar(evento) {
     evento.preventDefault()
     const datos = new FormData(evento.currentTarget)
     const viaje = {
-      id: Math.max(9000, ...viajes.map(viaje => viaje.id)) + 1,
       route: Number(rutaElegida),
       vehicle: Number(datos.get('vehiculo')),
       driver: Number(datos.get('conductor')),
       departure: datos.get('salida'),
       passengers: Number(datos.get('pasajeros')),
       observations: datos.get('observaciones').trim(),
-      status: 'PROGRAMADO',
     }
 
     const mensaje = validarViaje(viaje, vehiculos, viajes, conductores, rutas)
     if (mensaje) setError(mensaje)
-    else registrar(viaje)
+    else setError(await registrar(viaje))
   }
 
   return (

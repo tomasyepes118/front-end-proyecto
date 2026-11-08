@@ -1,19 +1,22 @@
 import { useState } from 'react'
-import { cuentasDemo } from '../data/demo.js'
 
-export default function Acceso({ iniciarSesion }) {
+export default function Acceso({ iniciarSesion, aviso }) {
   const [error, setError] = useState('')
   const [mostrarClave, setMostrarClave] = useState(false)
+  const [enviando, setEnviando] = useState(false)
 
-  function enviar(evento) {
+  async function enviar(evento) {
     evento.preventDefault()
     const datos = new FormData(evento.currentTarget)
 
-    const usuario = datos.get('usuario').trim().toLowerCase()
-    if (Object.hasOwn(cuentasDemo, usuario) && datos.get('contrasena') === 'floatmate123') {
-      iniciarSesion(usuario)
-    } else {
-      setError('Usuario o contraseña incorrectos. Inténtalo de nuevo.')
+    setEnviando(true)
+    setError('')
+    try {
+      await iniciarSesion(datos.get('usuario'), datos.get('contrasena'))
+    } catch (fallo) {
+      setError(fallo.message)
+    } finally {
+      setEnviando(false)
     }
   }
 
@@ -38,9 +41,9 @@ export default function Acceso({ iniciarSesion }) {
               {mostrarClave ? 'Ocultar' : 'Ver'}
             </button>
           </div>
-          <button className="primary" type="submit">Ingresar</button>
-          {error && <p className="error" role="alert">{error}</p>}
-          <small className="demo-access">Usuarios de demostración <strong>admin</strong>, <strong>operador</strong> y <strong>consulta</strong>. Contraseña <strong>floatmate123</strong>.</small>
+          <button className="primary" type="submit" disabled={enviando}>{enviando ? 'Ingresando…' : 'Ingresar'}</button>
+          {(error || aviso) && <p className="error" role="alert">{error || aviso}</p>}
+          <small className="demo-access">Usuarios de demostración <strong>admin</strong>, <strong>operador</strong> y <strong>consulta</strong>. Usa la contraseña configurada en el backend.</small>
         </form>
       </div>
     </main>
