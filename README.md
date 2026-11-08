@@ -1,60 +1,50 @@
-# Laboratorio II · Programación Web
+# FloatMate | Laboratorio II del PPI
 
-**Estudiante:** Tomas Yepes Arboleda  
-**Institución:** Institución Universitaria Pascual Bravo  
+Proyecto de Programación Web de Tomás Yepes Arboleda, cuarto semestre de Desarrollo de Software en la Institución Universitaria Pascual Bravo.
 
-## Ejecutar
+Esta entrega migra a React el [frontend HTML de FloatMate](https://github.com/tomasyepes118/Floatmate/tree/f5b999c/06_Material_adicional/Codigo_y_bases_de_datos/01_Codigo_web/FloatMate_Web) y toma los estilos y catálogos del [prototipo navegable de la Parte I](https://github.com/tomasyepes118/Floatmate/tree/dde211aa8bed4d5f661cab0fd88969db4c0324ca/05_Tareas_adicionales/2026-10-13_Diagramas_y_mockup/Mockup/01_Parte_I/01_Prototipo_navegable). Conserva la pantalla de acceso, el resumen, el inventario de vehículos y la programación de viajes. Todo funciona en el navegador con JavaScript, JSX, Vite y CSS.
 
-Requiere Node.js 22.12 o posterior compatible con Vite y npm.
+## Cómo ejecutarlo
+
+Usa Node.js 22.12 o una versión posterior compatible con Vite.
 
 ```bash
+git clone -b laboratorio-ii-ppi https://github.com/tomasyepes118/front-end-proyecto.git
+cd front-end-proyecto
 npm ci
 npm run dev
 ```
 
-Abrir la dirección que muestre Vite en la terminal.
+Abre la URL que aparezca en la terminal. El usuario de demostración es `admin` y la contraseña es `floatmate123`. Son datos ficticios para probar el formulario.
+
+## Recorrido
+
+| Vista | Qué puedes hacer |
+| --- | --- |
+| Acceso | Probar las credenciales de ejemplo y cerrar sesión desde el panel. |
+| Resumen | Consultar los indicadores, el estado de la flota y las próximas salidas. |
+| Vehículos | Buscar por placa o marca, filtrar por estado y registrar un bus. |
+| Viajes | Buscar por ruta, conductor o placa, filtrar y programar un viaje. El formulario valida fecha futura, disponibilidad, capacidad y cruce de horarios. |
+
+Los registros nuevos quedan en `localStorage` del navegador y se pueden consultar después de recargar. El acceso simulado se conserva en `sessionStorage` durante la sesión de la pestaña. Usa el mismo navegador y la misma URL para ver tus datos. Las pantallas del panel se identifican con las rutas `#panel`, `#vehiculos` y `#viajes`.
+
+## Organización
+
+- `src/pages/` contiene las cuatro pantallas.
+- `src/components/` contiene el menú, los formularios y los elementos reutilizables.
+- `src/data/` contiene los vehículos, rutas, conductores y viajes de ejemplo.
+- `src/lib/` reúne la persistencia local y las reglas de programación.
+- `src/App.jsx` coordina la navegación y comparte los datos con las pantallas.
+
+## Verificación
 
 ```bash
 npm run lint
 npm run build
-npm run preview
 ```
 
-`node_modules` y `dist` están excluidos mediante `.gitignore`.
-`package-lock.json` está incluido para instalar las mismas versiones.
+Para verificar el guardado en el navegador, registra un bus con una placa nueva y programa un viaje con ese bus. Escoge una fecha futura y un conductor libre. Recarga la página y busca ambos registros por placa.
 
-## Ramas y pull requests
+## Desarrollo del laboratorio
 
-1. `main`: proyecto base con el encabezado solicitado.
-2. `stage`: creada desde `main`.
-3. `develop`: creada desde `stage`.
-4. `feature/tomas_yepes`: creada desde `develop`; agrega el nombre.
-
-El cambio debe integrarse en GitHub mediante estos tres pull requests,
-en este orden:
-
-| Rama de origen (compare) | Rama destino (base) | Cambio |
-| --- | --- | --- |
-| `feature/tomas_yepes` | `develop` | Agregar el nombre del estudiante |
-| `develop` | `stage` | Integrar el trabajo terminado |
-| `stage` | `main` | Publicar la versión final |
-
-Usar **Create a merge commit** al aceptar cada pull request. Conservar las
-cuatro ramas para que el profesor pueda revisarlas.
-
-Esta versión corresponde a un solo integrante. No representa un trabajo de
-tres personas ni contiene invitaciones a compañeros. El enunciado solicita
-grupos de tres; el profesor debe aceptar la modalidad individual.
-
-## Conceptos de repaso
-
-- **Modified (modificado):** el archivo cambió en la carpeta de trabajo.
-- **Staged (preparado):** `git add` seleccionó los cambios para el siguiente commit.
-- **Committed (confirmado):** `git commit` guardó esos cambios en el historial local.
-- **Rama:** referencia a una línea de trabajo; permite preparar cambios por separado.
-- **Push:** envía commits al repositorio remoto.
-- **Pull request:** solicitud en GitHub para revisar e integrar una rama en otra.
-- **Merge:** combina historiales y cambios de ramas.
-- **Fetch:** descarga referencias remotas sin integrar los cambios en la rama actual.
-- **Status:** muestra cambios preparados, modificados y archivos sin seguimiento.
-- **Diff:** muestra las diferencias entre versiones.
+Se reutilizó el proyecto base de React y Vite que ya estaba en el historial del repositorio. Se usó IA para apoyar la migración del prototipo y la implementación de los módulos. La guía del curso pide realizar manualmente la estructura inicial, las páginas y rutas de un módulo. Esa práctica debe quedar respaldada por el estudiante con su propio trabajo.
