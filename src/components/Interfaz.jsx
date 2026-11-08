@@ -9,7 +9,7 @@ export function Encabezado({ seccion, titulo, descripcion, accion, alPulsar }) {
         <h1>{titulo}</h1>
         <p>{descripcion}</p>
       </div>
-      <button className="primary" onClick={alPulsar}>+ {accion}</button>
+      {accion && <button className="primary" onClick={alPulsar}>+ {accion}</button>}
     </div>
   )
 }

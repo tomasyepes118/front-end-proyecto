@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { cuentasDemo } from '../data/demo.js'
 
 export default function Acceso({ iniciarSesion }) {
   const [error, setError] = useState('')
@@ -8,8 +9,9 @@ export default function Acceso({ iniciarSesion }) {
     evento.preventDefault()
     const datos = new FormData(evento.currentTarget)
 
-    if (datos.get('usuario').trim() === 'admin' && datos.get('contrasena') === 'floatmate123') {
-      iniciarSesion()
+    const usuario = datos.get('usuario').trim().toLowerCase()
+    if (Object.hasOwn(cuentasDemo, usuario) && datos.get('contrasena') === 'floatmate123') {
+      iniciarSesion(usuario)
     } else {
       setError('Usuario o contraseña incorrectos. Inténtalo de nuevo.')
     }
@@ -38,7 +40,7 @@ export default function Acceso({ iniciarSesion }) {
           </div>
           <button className="primary" type="submit">Ingresar</button>
           {error && <p className="error" role="alert">{error}</p>}
-          <small className="demo-access">Acceso de demostración <strong>admin</strong> / <strong>floatmate123</strong></small>
+          <small className="demo-access">Usuarios de demostración <strong>admin</strong>, <strong>operador</strong> y <strong>consulta</strong>. Contraseña <strong>floatmate123</strong>.</small>
         </form>
       </div>
     </main>

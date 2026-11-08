@@ -22,7 +22,7 @@ export default function Resumen({ vehiculos, viajes, abrirViaje }) {
 
   return (
     <section>
-      <Encabezado seccion="RESUMEN" titulo="La operación, de un vistazo" descripcion="Disponibilidad de la flota y programación de la terminal." accion="Programar viaje" alPulsar={abrirViaje} />
+      <Encabezado seccion="RESUMEN" titulo="La operación, de un vistazo" descripcion="Disponibilidad de la flota y programación de la terminal." accion={abrirViaje && 'Programar viaje'} alPulsar={abrirViaje} />
       <div className="metrics">
         {indicadores.map(([titulo, valor, detalle]) => (
           <article className="metric" key={titulo}>
@@ -32,7 +32,7 @@ export default function Resumen({ vehiculos, viajes, abrirViaje }) {
       </div>
       <div className="grid">
         <article className="card">
-          <div className="card-title"><h2>Próximos viajes</h2><a href="#viajes">Ver programación →</a></div>
+          <div className="card-title"><h2>Próximos viajes</h2>{abrirViaje && <a href="#viajes">Ver programación →</a>}</div>
           <Tabla nombre="Próximos viajes" columnas={['Ruta', 'Salida', 'Bus', 'Estado']}>
             {proximos.slice(0, 4).map(viaje => (
               <tr key={viaje.id}>

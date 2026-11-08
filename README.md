@@ -15,22 +15,33 @@ npm ci
 npm run dev
 ```
 
-Abre la URL que aparezca en la terminal. El usuario de demostración es `admin` y la contraseña es `floatmate123`. Son datos ficticios para probar el formulario.
+Abre la URL que aparezca en la terminal. Las tres cuentas de demostración usan la contraseña `floatmate123`.
+
+| Usuario | Permisos en la interfaz |
+| --- | --- |
+| `admin` | Gestionar catálogos, registrar la operación y revisar los reportes y la auditoría. |
+| `operador` | Consultar los catálogos, gestionar viajes, registrar ACPM e incidentes y consultar los reportes. |
+| `consulta` | Ver el resumen y los reportes. |
 
 ## Recorrido
 
-| Vista | Qué puedes hacer |
+| Módulo | Qué puedes hacer |
 | --- | --- |
-| Acceso | Probar las credenciales de ejemplo y cerrar sesión desde el panel. |
-| Resumen | Consultar los indicadores, el estado de la flota y las próximas salidas. |
-| Vehículos | Buscar por placa o marca, filtrar por estado y registrar un bus. |
-| Viajes | Buscar por ruta, conductor o placa, filtrar y programar un viaje. El formulario valida fecha futura, disponibilidad, capacidad y cruce de horarios. |
+| Resumen | Consultar los indicadores de la flota y las próximas salidas. |
+| Vehículos | Buscar, filtrar, registrar y editar los buses. |
+| Conductores | Consultar, registrar, editar y marcar conductores como inactivos. |
+| Rutas | Consultar, registrar y editar rutas con distancia y duración estimadas. |
+| Viajes | Programar, registrar un control de alcoholemia simulado, iniciar y cerrar viajes. |
+| ACPM | Registrar litros y precio por litro. El sistema calcula el total. |
+| Incidentes | Registrar un incidente y guardar una imagen ficticia como evidencia. |
+| Reportes | Consultar el historial y descargar los viajes en CSV. |
+| Auditoría | Consultar los cambios registrados y la cuenta de demostración que los hizo. |
 
-Los registros nuevos quedan en `localStorage` del navegador y se pueden consultar después de recargar. El acceso simulado se conserva en `sessionStorage` durante la sesión de la pestaña. Usa el mismo navegador y la misma URL para ver tus datos. Las pantallas del panel se identifican con las rutas `#panel`, `#vehiculos` y `#viajes`.
+El despacho requiere un control aprobado con ticket o referencia de evidencia y la confirmación del operador. Los registros se guardan en `localStorage`; la sesión de demostración se conserva en `sessionStorage`. La interfaz simula permisos de los tres roles. Usa exclusivamente datos ficticios. Las pantallas se navegan mediante fragmentos de URL como `#panel`, `#vehiculos` y `#viajes`.
 
 ## Organización
 
-- `src/pages/` contiene las cuatro pantallas.
+- `src/pages/` contiene las pantallas y los módulos.
 - `src/components/` contiene el menú, los formularios y los elementos reutilizables.
 - `src/data/` contiene los vehículos, rutas, conductores y viajes de ejemplo.
 - `src/lib/` reúne la persistencia local y las reglas de programación.
@@ -43,8 +54,10 @@ npm run lint
 npm run build
 ```
 
-Para verificar el guardado en el navegador, registra un bus con una placa nueva y programa un viaje con ese bus. Escoge una fecha futura y un conductor libre. Recarga la página y busca ambos registros por placa.
+Para verificar el recorrido, registra un bus y programa un viaje con fecha futura. Intenta iniciarlo sin control para ver el bloqueo. Registra un control aprobado y un ticket ficticio, confirma el inicio y cierra el viaje. Recarga la página y verifica el resultado en Reportes y Auditoría.
 
 ## Desarrollo del laboratorio
+
+Los módulos simulados siguen el [alcance propuesto en el análisis de factibilidad](https://github.com/tomasyepes118/Floatmate/blob/dde211aa8bed4d5f661cab0fd88969db4c0324ca/01_Analisis_de_factibilidad/FloatMate_Factibilidad.pdf).
 
 Se reutilizó el proyecto base de React y Vite que ya estaba en el historial del repositorio. Se usó IA para apoyar la migración del prototipo y la implementación de los módulos. La guía del curso pide realizar manualmente la estructura inicial, las páginas y rutas de un módulo. Esa práctica debe quedar respaldada por el estudiante con su propio trabajo.

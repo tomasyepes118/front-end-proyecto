@@ -1,9 +1,8 @@
 import { useState } from 'react'
-import { conductores, rutas } from '../data/demo.js'
 import { validarViaje } from '../lib/operacion.js'
 import { Dialogo } from './Interfaz.jsx'
 
-export default function FormularioViaje({ vehiculos, viajes, registrar, cerrar }) {
+export default function FormularioViaje({ vehiculos, viajes, conductores, rutas, registrar, cerrar }) {
   const [rutaElegida, setRutaElegida] = useState('')
   const [error, setError] = useState('')
   const ruta = rutas.find(ruta => ruta.id === Number(rutaElegida))
@@ -23,7 +22,7 @@ export default function FormularioViaje({ vehiculos, viajes, registrar, cerrar }
       status: 'PROGRAMADO',
     }
 
-    const mensaje = validarViaje(viaje, vehiculos, viajes)
+    const mensaje = validarViaje(viaje, vehiculos, viajes, conductores, rutas)
     if (mensaje) setError(mensaje)
     else registrar(viaje)
   }
@@ -34,7 +33,7 @@ export default function FormularioViaje({ vehiculos, viajes, registrar, cerrar }
         Ruta activa
         <select required value={rutaElegida} onChange={e => setRutaElegida(e.target.value)}>
           <option value="">Selecciona una ruta</option>
-          {rutas.map(ruta => <option key={ruta.id} value={ruta.id}>{ruta.code} · {ruta.destination}</option>)}
+          {rutas.filter(ruta => ruta.activa).map(ruta => <option key={ruta.id} value={ruta.id}>{ruta.code} · {ruta.destination}</option>)}
         </select>
       </label>
       <p className="route-detail">

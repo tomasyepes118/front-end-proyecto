@@ -1,35 +1,55 @@
-export function leerLista(clave, datosIniciales) {
+import { conductoresIniciales, crearViajesIniciales, cuentasDemo, rutasIniciales, vehiculosIniciales } from '../data/demo.js'
+
+const claveDatos = 'floatmate-ppi-operacion'
+const claveSesion = 'floatmate-ppi-sesion'
+
+function leerDatosGuardados(clave) {
   try {
-    const datos = JSON.parse(localStorage.getItem(clave))
-    if (Array.isArray(datos)) return datos
+    return JSON.parse(localStorage.getItem(clave))
   } catch {
-    // Si el navegador bloquea el almacenamiento, se usan los datos de ejemplo.
+    return null
   }
-  return datosIniciales()
 }
 
-export function guardarLista(clave, datos) {
+export function leerOperacion() {
+  const guardados = leerDatosGuardados(claveDatos)
+  const vehiculosAnteriores = leerDatosGuardados('floatmate-ppi-vehiculos')
+  const viajesAnteriores = leerDatosGuardados('floatmate-ppi-viajes')
+
+  return {
+    vehiculos: guardados?.vehiculos ?? (Array.isArray(vehiculosAnteriores) ? vehiculosAnteriores : vehiculosIniciales),
+    viajes: guardados?.viajes ?? (Array.isArray(viajesAnteriores) ? viajesAnteriores : crearViajesIniciales()),
+    conductores: guardados?.conductores ?? conductoresIniciales,
+    rutas: guardados?.rutas ?? rutasIniciales,
+    controles: guardados?.controles ?? [],
+    acpm: guardados?.acpm ?? [],
+    incidentes: guardados?.incidentes ?? [],
+    auditoria: guardados?.auditoria ?? [],
+  }
+}
+
+export function guardarOperacion(datos) {
   try {
-    localStorage.setItem(clave, JSON.stringify(datos))
+    localStorage.setItem(claveDatos, JSON.stringify(datos))
     return true
   } catch {
     return false
   }
 }
 
-const claveSesion = 'floatmate-ppi-sesion'
-
 export function leerSesion() {
   try {
-    return sessionStorage.getItem(claveSesion) === 'activa'
+    const usuario = sessionStorage.getItem(claveSesion)
+    if (usuario === 'activa') return 'admin'
+    return Object.hasOwn(cuentasDemo, usuario) ? usuario : ''
   } catch {
-    return false
+    return ''
   }
 }
 
-export function guardarSesion(activa) {
+export function guardarSesion(usuario) {
   try {
-    if (activa) sessionStorage.setItem(claveSesion, 'activa')
+    if (usuario) sessionStorage.setItem(claveSesion, usuario)
     else sessionStorage.removeItem(claveSesion)
   } catch {
     // El acceso de demostración funciona en memoria durante la visita.
